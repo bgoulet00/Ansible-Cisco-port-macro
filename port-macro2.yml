@@ -1,0 +1,44 @@
+---
+## macro is a multiline config that does not return a device prompt between commands.  this confuses ansible
+## the workaround is to send a single config line that contains \r carriage return characters between the commands
+## note this must be carrriage return \r, not new line \n
+## \r needs to be surrounded in double quotes to be respected but multiline does not support quoting 
+## as a workaround, variable CR is defined with value "\r" and that variable is placed wherever a carriage return is desired in the multilne
+
+## configuring a port macro will automaticaly delete/overwrite and existing macro of the same name so doing a before: 'no macro name' 
+## should not be required but without this addition ansible fails with an odd error
+
+- name: configure port macros
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+  vars:
+    ansible_network_os: cisco.ios.ios
+    CR: "\r"
+
+  tasks:
+
+  - name: user macro
+    ios_config:
+      lines: >
+        macro name user{{CR}}
+        description USER{{CR}}
+        switchport access vlan 61{{CR}}
+        switchport mode access{{CR}}
+        switchport voice vlan 41{{CR}}
+        no snmp trap link-status{{CR}}
+        spanning-tree portfast{{CR}}
+        spanning-tree bpduguard enable{{CR}}
+        no shutdown{{CR}}
+        device-tracking attach-policy IPDT_MAX_10{{CR}}
+        no macro description{{CR}}
+        auto qos trust dscp{{CR}}
+        @
+      before: no macro name user
+
+##### SAVE CONFIG #####
+
+  - name: save config
+    ios_config:
+      save_when: always
+   

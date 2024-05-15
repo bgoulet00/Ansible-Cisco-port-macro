@@ -1,0 +1,24 @@
+---
+## macro is a multiline config that does not return a device prompt between commands.  this confuses ansible
+## the workaround is to send a single config line that contains \r carriage return characters between the commands
+
+- name: configure port macros
+  hosts: all
+  connection: local
+  gather_facts: no
+
+     
+  tasks: 
+      
+  - name: user macro
+    ios_config:
+      lines: 
+        - "macro name user\r description USER\r switchport access vlan 61\r switchport mode access\r switchport voice vlan 41\r no snmp trap link-status\r spanning-tree portfast\r spanning-tree bpduguard enable\r no shutdown\r device-tracking attach-policy IPDT_MAX_10\r no macro description\r auto qos trust dscp\r @"
+      before: no macro name user
+
+##### SAVE CONFIG #####
+
+  - name: save config
+    ios_config:
+      save_when: always
+   
