@@ -4,8 +4,10 @@
 
 - name: configure port macros
   hosts: all
-  connection: local
+  connection: network_cli
   gather_facts: no
+  vars:
+    ansible_network_os: cisco.ios.ios
 
      
   tasks: 
